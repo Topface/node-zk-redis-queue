@@ -1,0 +1,35 @@
+{
+  "name": "zk-redis-queue",
+  "version": "0.1.0",
+  "description": "Truly distributed and parallel parallel queue on top of redis and zookeeper without SPoF.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "async": "~0.2.8",
+    "mess": "~0.1.1",
+    "redis": "~0.8.3",
+    "zkjs": "~3.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Topface/node-zk-redis-queue.git"
+  },
+  "keywords": [
+    "redis",
+    "zookeeper",
+    "zk",
+    "queue",
+    "task",
+    "distributed",
+    "spof"
+  ],
+  "author": "Ian Babrou <ibobrik@gmail.com> (http://bobrik.name/)",
+  "license": "BSD",
+  "readmeFilename": "README.md"
+}
