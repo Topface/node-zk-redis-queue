@@ -1,16 +1,39 @@
 (function() {
     var assert   = require("assert"),
         async    = require("async"),
-        Redis    = require("redis"),
+        simple  = require("simple_redis"),
         Queue    = require("../index"),
         ZK       = require("zkjs"),
         zk       = new ZK({hosts: ["api.yongwo.de:2181"], root: "/rq00", timeout: 2000}),
-        redisOne = Redis.createClient(6379, "127.0.0.1", {retry_max_delay: 1000}),
-        redisTwo = Redis.createClient(6380, "127.0.0.1", {retry_max_delay: 1000}),
-        queue    = new Queue([redisOne, redisTwo], zk, "woo"),
-        timer;
+        redisOne, redisTwo, queue, timer;
 
-    console.log("Please make sure you have redis servers on ports 6379 and 6380 to test!");
+
+    function createQueue(callback) {
+        function createRedisOne(callback) {
+            simple.request("ibobrik@gmail.com", {retry_max_delay: 1000}, function(error, redis) {
+                assert.ifError(error);
+
+                redisOne = redis;
+                callback(error);
+            });
+        }
+
+        function createRedisTwo(callback) {
+            simple.request("ibobrik@gmail.com", {retry_max_delay: 1000}, function(error, redis) {
+                assert.ifError(error);
+
+                redisTwo = redis;
+                callback();
+            });
+        }
+
+        async.series([createRedisOne, createRedisTwo], function(error) {
+            assert.ifError(error);
+
+            queue = new Queue([redisOne, redisTwo], zk, "woo");
+            callback();
+        });
+    }
 
     function clearFirst(callback) {
         queue.clear(function(error, removed) {
@@ -107,19 +130,48 @@
         redisTwo.quit();
     }
 
-    timer = setTimeout(function() {
-        end(new Error("Queue is not ready after 2000ms"));
-    }, 2000);
+    (function createQueue(callback) {
+        function createRedisOne(callback) {
+            simple.request("ibobrik@gmail.com", {retry_max_delay: 1000}, function(error, redis) {
+                assert.ifError(error);
 
-    queue.on("error", function(error) {
-        console.log("Queue emitted error", error);
-    });
+                redisOne = redis;
+                callback(error);
+            });
+        }
 
-    queue.on("ready", function() {
-        clearTimeout(timer);
+        function createRedisTwo(callback) {
+            simple.request("ibobrik@gmail.com", {retry_max_delay: 1000}, function(error, redis) {
+                assert.ifError(error);
 
-        console.log("Ready, starting test..");
+                redisTwo = redis;
+                callback();
+            });
+        }
 
-        async.series([clearFirst, checkSize, testPush, testPop, zk.close.bind(zk)], end);
+        async.series([createRedisOne, createRedisTwo], function(error) {
+            assert.ifError(error);
+
+            queue = new Queue([redisOne, redisTwo], zk, "woo");
+            callback();
+        });
+    })(function(error) {
+        assert.ifError(error);
+
+        timer = setTimeout(function() {
+            end(new Error("Queue is not ready after 2000ms"));
+        }, 2000);
+
+        queue.on("error", function(error) {
+            console.log("Queue emitted error", error);
+        });
+
+        queue.on("ready", function() {
+            clearTimeout(timer);
+
+            console.log("Ready, starting test..");
+
+            async.series([clearFirst, checkSize, testPush, testPop, zk.close.bind(zk)], end);
+        });
     });
 })();
