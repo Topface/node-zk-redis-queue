@@ -126,8 +126,7 @@
 
         console.log("All good!");
 
-        redisOne.quit();
-        redisTwo.quit();
+        queue.close();
     }
 
     (function createQueue(callback) {
@@ -171,7 +170,7 @@
 
             console.log("Ready, starting test..");
 
-            async.series([clearFirst, checkSize, testPush, testPop, zk.close.bind(zk)], end);
+            async.series([clearFirst, checkSize, testPush, testPop], end);
         });
     });
 })();
