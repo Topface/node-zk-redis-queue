@@ -1,6 +1,6 @@
 {
   "name": "zk-redis-queue",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Truly distributed and parallel parallel queue on top of redis and zookeeper without SPoF.",
   "main": "index.js",
   "directories": {
